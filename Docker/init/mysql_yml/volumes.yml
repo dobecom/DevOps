@@ -1,0 +1,11 @@
+version: "3.8"
+
+volumes:
+  mysql_master_data:
+    name: mysql_master_data
+  mysql_slave1_data:
+    name: mysql_slave1_data
+  redis_data:
+    name: redis_data
+  redis_conf:
+    name: redis_conf
