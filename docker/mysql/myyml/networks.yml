@@ -1,0 +1,11 @@
+version: "3.8"
+
+networks:
+  do-net:
+    name: do-net
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/21
+          gateway: 172.20.0.1

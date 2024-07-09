@@ -1,0 +1,125 @@
+version: "3.8"
+
+services:
+  pg-master:
+    image: postgres:16.1
+    hostname: pg_master
+    container_name: pg_master
+    networks:
+      do-net:
+        ipv4_address: ${PGSQL_MASTER_IP}
+    ports:
+      - ${PGSQL_MASTER_PORT}:5432
+    environment:
+      POSTGRES_DB: ${PGSQL_DB}
+      POSTGRES_USER: ${PGSQL_ID}
+      POSTGRES_PASSWORD: ${PGSQL_PW}
+      SERVICE_DB: ${PGSQL_SERVICE_DB}
+      SERVICE_SCHEMA: ${PGSQL_SERVICE_SCHEMA}
+      SERVICE_ADMIN_ID: ${PGSQL_SERVICE_ADMIN_ID}
+      SERVICE_ADMIN_PW: ${PGSQL_SERVICE_ADMIN_PW}
+      SERVICE_USER_ID: ${PGSQL_SERVICE_USER_ID}
+      SERVICE_USER_PW: ${PGSQL_SERVICE_USER_PW}
+      REPLICA_ID: ${PGSQL_REPLICA_ID}
+      REPLICA_PW: ${PGSQL_REPLICA_PW}
+      PGDATA: /var/lib/postgresql/data
+      TZ: Asia/Seoul
+    volumes:
+      - ../init/sql:/sql
+      - ../init/master/postgresql.conf:/etc/postgresql/postgresql.conf
+      - ../init/master/pg_hba.conf:/etc/postgresql/pg_hba.conf
+      - pg_master_data:/var/lib/postgresql/data
+      - ../init/master/sh:/docker-entrypoint-initdb.d
+    command: 'postgres -c "config_file=/etc/postgresql/postgresql.conf"'
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 4096M
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+  pg-slave1:
+    image: postgres:16.1
+    hostname: pg-slave1
+    container_name: pg-slave1
+    networks:
+      do-net:
+        ipv4_address: ${PGSQL_SLAVE1_IP}
+    ports:
+      - ${PGSQL_SLAVE1_PORT}:5432
+    environment:
+      POSTGRES_DB: ${PGSQL_DB}
+      POSTGRES_USER: ${PGSQL_ID}
+      POSTGRES_PASSWORD: ${PGSQL_PW}
+      SERVICE_DB: ${PGSQL_SERVICE_DB}
+      SERVICE_SCHEMA: ${PGSQL_SERVICE_SCHEMA}
+      SERVICE_ADMIN_ID: ${PGSQL_SERVICE_ADMIN_ID}
+      SERVICE_ADMIN_PW: ${PGSQL_SERVICE_ADMIN_PW}
+      SERVICE_USER_ID: ${PGSQL_SERVICE_USER_ID}
+      SERVICE_USER_PW: ${PGSQL_SERVICE_USER_PW}
+      REPLICA_ID: ${PGSQL_REPLICA_ID}
+      REPLICA_PW: ${PGSQL_REPLICA_PW}
+      PGDATA: /var/lib/postgresql/data
+      TZ: Asia/Seoul
+    volumes:
+      - ../init/sql:/sql
+      - ../init/slave1/postgresql.conf:/etc/postgresql/postgresql.conf
+      - ../init/slave1/pg_hba.conf:/etc/postgresql/pg_hba.conf
+      - pg_slave1_data:/var/lib/postgresql/data:rw
+      - ../init/slave1/sh:/docker-entrypoint-initdb.d
+    command: 'postgres -c "config_file=/etc/postgresql/postgresql.conf"'
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 4096M
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    depends_on:
+      pg-master:
+        condition: service_healthy
+  do-redis:
+    image: redis:7.0.12
+    hostname: do-redis
+    container_name: do-redis
+    restart: always
+    networks:
+      do-net:
+        ipv4_address: ${REDIS_IP}
+    ports:
+      - ${REDIS_PORT}:6379
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - ../init/redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - do_redis_data:/data:rw
+      - do_redis_conf:/usr/local/conf:rw
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1024M
+  do-rabbitmq:
+    image: rabbitmq:3.12.7-management-alpine
+    container_name: do-rabbitmq
+    hostname: do-rabbitmq
+    networks:
+      do-net:
+        ipv4_address: ${RABBITMQ_IP}
+    ports:
+      - ${RABBITMQ_MNG_PORT}:15672
+      - ${RABBITMQ_PORT}:5672
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER_ID}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_USER_PW}
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1024M

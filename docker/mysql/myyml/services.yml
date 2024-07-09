@@ -1,0 +1,122 @@
+version: "3.8"
+
+services:
+  mysql-master:
+    image: mysql:8.0.33
+    hostname: mysql_master
+    container_name: mysql_master
+    networks:
+      do-net:
+        ipv4_address: ${MYSQL_MASTER_IP}
+    ports:
+      - ${MYSQL_MASTER_PORT}:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_MASTER_ROOT_PW}
+      TZ: Asia/Seoul
+    volumes:
+      - ../init/master/my.cnf:/etc/mysql/my.cnf
+      - ../init/master:/docker-entrypoint-initdb.d
+      - mysql_master_data:/var/lib/mysql:rw
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 4096M
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+  mysql-slave1:
+    image: mysql:8.0.33
+    hostname: mysql_slave1
+    container_name: mysql_slave1
+    networks:
+      do-net:
+        ipv4_address: ${MYSQL_SLAVE1_IP}
+    ports:
+      - ${MYSQL_SLAVE1_PORT}:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_SLAVE1_ROOT_PW}
+      TZ: Asia/Seoul
+    volumes:
+      - ../init/slave1/my.cnf:/etc/mysql/my.cnf
+      - ../init/slave1:/docker-entrypoint-initdb.d
+      - mysql_slave1_data:/var/lib/mysql:rw
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 4096M
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    depends_on:
+      mysql-master:
+        condition: service_healthy
+  memcached-node1:
+    image: memcached:1.6.18
+    hostname: memcached_node1
+    container_name: memcached_node1
+    restart: always
+    networks:
+      do-net:
+        ipv4_address: ${MEMCACHED_NODE1_IP}
+    ports:
+      - ${MEMCACHED_NODE1_PORT}:11211
+    command: ["-m", "1024"]
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1024M
+    depends_on:
+      mysql-slave1:
+        condition: service_healthy
+  memcached-node2:
+    image: memcached:1.6.18
+    hostname: memcached_node2
+    container_name: memcached_node2
+    restart: always
+    networks:
+      do-net:
+        ipv4_address: ${MEMCACHED_NODE2_IP}
+    ports:
+      - ${MEMCACHED_NODE2_PORT}:11211
+    command: ["-m", "1024"]
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1024M
+    depends_on:
+      mysql-slave1:
+        condition: service_healthy
+  redis:
+    image: redis:7.0.12
+    hostname: redis
+    container_name: redis
+    restart: always
+    networks:
+      do-net:
+        ipv4_address: ${REDIS_IP}
+    ports:
+      - ${REDIS_PORT}:6379
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - ../init/redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - redis_data:/data:rw
+      - redis_conf:/usr/local/conf:rw
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1024M
