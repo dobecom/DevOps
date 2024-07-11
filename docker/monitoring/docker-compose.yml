@@ -1,0 +1,84 @@
+version: '3.8'
+
+services:  
+  prometheus: # default port 9090
+    image: prom/prometheus:v2.18.1
+    container_name: do-prometheus
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - ./conf/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./conf/rules.yml:/etc/prometheus/rules.yml
+      - ./conf/mem_rules.yml:/etc/prometheus/mem_rules.yml
+      - ./conf/mem_rules_60.yml:/etc/prometheus/mem_rules_60.yml
+      - './data/prometheus:/data/prometheus'
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/data/prometheus'
+    depends_on:
+    - cadvisor
+
+  node-exporter: # Sharing Host network, default port 9100
+    image: prom/node-exporter:v1.8.1
+    container_name: do-node-exporter
+    command:
+      - '--path.rootfs=/host'
+    network_mode: host
+    pid: host
+    restart: unless-stopped
+    volumes:
+      - '/:/host:ro,rslave'
+
+  cadvisor: # google/cadvisor is deprecated, use gcr.io/cadvisor/cadvisor
+    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    container_name: do-cadvisor
+    restart: unless-stopped
+    ports:
+    - 9200:8080 
+    volumes:
+    - /:/rootfs:ro
+    - /var/run:/var/run:rw
+    - /sys:/sys:ro
+    - /var/lib/docker/:/var/lib/docker:ro
+    depends_on:
+    - redis
+
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    container_name: do-alertmanager
+    restart: unless-stopped
+    ports:
+    - 9300:9093
+    volumes:
+    - ./conf/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    - ./data/alertmanager:/data
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/data'
+
+  grafana:
+    image: grafana/grafana-oss:11.1.0
+    container_name: do-grafana
+    restart: unless-stopped
+    ports:
+    - 9900:3000
+    volumes:
+    - ./conf/grafana.ini:/etc/grafana/grafana.ini
+    - ./data/grafana:/var/lib/grafana
+
+  redis:
+    image: redis:latest
+    container_name: do-redis
+    command: redis-server /usr/local/etc/redis/redis.conf
+    restart: unless-stopped
+    ports:
+    - 6390:6379
+    volumes:
+    - ./conf/redis.conf:/usr/local/etc/redis/redis.conf
+    - ./data/redis:/data
+    #- goat_redis_conf:/usr/local/conf:rw
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1024M
