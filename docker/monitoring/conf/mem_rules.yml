@@ -1,11 +1,11 @@
 groups:
   - name: MemoryThreshold
     rules:
-      - alert: HighRAMUsage
-        expr: 100 * (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) > 1
-        for: 10s
+      - alert: HighMemoryUsage
+        expr: job:memory_usage > 60
+        for: 1m
         labels:
-          severity: critical
+          severity: warning
         annotations:
-          summary: "High RAM usage on {{ $labels.instance }}"
-          description: "RAM usage on {{ $labels.instance }} is greater than 1%."
+          summary: "High Memory usage on {{ $labels.instance }}"
+          description: "Memory usage on {{ $labels.instance }} is greater than 60%. Current usage: {{ $value }}%"

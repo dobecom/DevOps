@@ -3,8 +3,10 @@ global:
   evaluation_interval: 10s
 rule_files:
   - rules.yml
+  - cpu_rules.yml
   - mem_rules.yml
-  - mem_rules_60.yml
+  - cpu_recording_rules.yml
+  - mem_recording_rules.yml
 alerting:
   alertmanagers:
   - static_configs:

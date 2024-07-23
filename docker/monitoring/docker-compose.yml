@@ -10,7 +10,9 @@ services:
       - ./conf/prometheus.yml:/etc/prometheus/prometheus.yml
       - ./conf/rules.yml:/etc/prometheus/rules.yml
       - ./conf/mem_rules.yml:/etc/prometheus/mem_rules.yml
-      - ./conf/mem_rules_60.yml:/etc/prometheus/mem_rules_60.yml
+      - ./conf/cpu_rules.yml:/etc/prometheus/cpu_rules.yml
+      - ./conf/mem_recording_rules.yml:/etc/prometheus/mem_recording_rules.yml
+      - ./conf/cpu_recording_rules.yml:/etc/prometheus/cpu_recording_rules.yml
       - './data/prometheus:/data/prometheus'
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'

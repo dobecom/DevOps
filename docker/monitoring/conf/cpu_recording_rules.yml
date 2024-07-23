@@ -1,0 +1,5 @@
+groups:
+  - name: recording-rules
+    rules:
+      - record: job:cpu_usage:avg1m
+        expr: 100 * (1 - avg by (instance) (irate(node_cpu_seconds_total{mode="idle"}[1m])))
