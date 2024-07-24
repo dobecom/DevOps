@@ -84,6 +84,19 @@ services:
     - ./data/loki:/data
     command:
       - '-config.file=/etc/loki/local-config.yaml'
+    depends_on:
+      - promtail
+
+  webhook-agent:
+    image: sylvius/webhook-agent:1.0
+    container_name: do-webhook-agent
+    environment:
+      - WEBHOOK_TYPE=${WEBHOOK_TYPE}
+      - TELEGRAM_API_TOKEN=${TELEGRAM_API_TOKEN}
+      - TELEGRAM_CHANNEL_NAME=${TELEGRAM_CHANNEL_NAME}
+      - JANDI_TOPIC_PATH=${JANDI_TOPIC_PATH}
+    ports:
+      - 9800:9800
 
   grafana:
     image: grafana/grafana-oss:11.1.0
