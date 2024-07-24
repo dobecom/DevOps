@@ -7,13 +7,14 @@ services:
     network_mode: host
     restart: unless-stopped
     volumes:
-      - ./conf/prometheus.yml:/etc/prometheus/prometheus.yml
-      - ./conf/rules.yml:/etc/prometheus/rules.yml
-      - ./conf/mem_rules.yml:/etc/prometheus/mem_rules.yml
-      - ./conf/cpu_rules.yml:/etc/prometheus/cpu_rules.yml
-      - ./conf/mem_recording_rules.yml:/etc/prometheus/mem_recording_rules.yml
-      - ./conf/cpu_recording_rules.yml:/etc/prometheus/cpu_recording_rules.yml
+      - ./conf/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./conf/prometheus/rules.yml:/etc/prometheus/rules.yml
+      - ./conf/prometheus/mem_rules.yml:/etc/prometheus/mem_rules.yml
+      - ./conf/prometheus/cpu_rules.yml:/etc/prometheus/cpu_rules.yml
+      - ./conf/prometheus/mem_recording_rules.yml:/etc/prometheus/mem_recording_rules.yml
+      - ./conf/prometheus/cpu_recording_rules.yml:/etc/prometheus/cpu_recording_rules.yml
       - './data/prometheus:/data/prometheus'
+    user: root
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/data/prometheus'
@@ -52,11 +53,37 @@ services:
     ports:
     - 9300:9093
     volumes:
-    - ./conf/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    - ./conf/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
     - ./data/alertmanager:/data
     command:
       - '--config.file=/etc/alertmanager/alertmanager.yml'
       - '--storage.path=/data'
+
+  promtail:
+    image: grafana/promtail:3.0.0
+    container_name: do-promtail
+    restart: unless-stopped
+    ports:
+      - 9400:9080
+    volumes:
+      - ./conf/promtail/promtail.yml:/etc/promtail/promtail.yml
+      - ./data/promtail:/data
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    command:
+      - '-config.file=/etc/promtail/promtail.yml'
+    user: root
+    
+  loki:
+    image: grafana/loki:2.9.2
+    container_name: do-loki
+    restart: unless-stopped
+    ports:
+    - 3100:3100
+    volumes:
+    - ./conf/loki/local-config.yaml:/etc/loki/local-config.yaml
+    - ./data/loki:/data
+    command:
+      - '-config.file=/etc/loki/local-config.yaml'
 
   grafana:
     image: grafana/grafana-oss:11.1.0
@@ -65,8 +92,12 @@ services:
     ports:
     - 9900:3000
     volumes:
-    - ./conf/grafana.ini:/etc/grafana/grafana.ini
+    - ./conf/grafana/grafana.ini:/etc/grafana/grafana.ini
+    - ./conf/grafana/dashboard.yaml:/etc/grafana/provisioning/dashboards/dashboard.yaml
+    - ./conf/grafana/datasource.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
+    - ./conf/grafana/dashboard.json:/var/lib/grafana/dashboards/dashboard.json
     - ./data/grafana:/var/lib/grafana
+    user: root
 
   redis:
     image: redis:latest
@@ -76,9 +107,8 @@ services:
     ports:
     - 6390:6379
     volumes:
-    - ./conf/redis.conf:/usr/local/etc/redis/redis.conf
+    - ./conf/redis/redis.conf:/usr/local/etc/redis/redis.conf
     - ./data/redis:/data
-    #- goat_redis_conf:/usr/local/conf:rw
     deploy:
       resources:
         limits:
