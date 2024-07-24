@@ -90,6 +90,7 @@ services:
   webhook-agent:
     image: sylvius/webhook-agent:1.0
     container_name: do-webhook-agent
+    restart: unless-stopped
     environment:
       - WEBHOOK_TYPE=${WEBHOOK_TYPE}
       - TELEGRAM_API_TOKEN=${TELEGRAM_API_TOKEN}
