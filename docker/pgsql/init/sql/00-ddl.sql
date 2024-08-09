@@ -1,17 +1,57 @@
--- public."user" definition
 
--- Drop table
-
--- DROP TABLE public."user";
-
-CREATE TABLE "user" (
-	created timestamp NOT NULL DEFAULT now(),
-	updated timestamp NOT NULL DEFAULT now(),
-	id serial4 NOT NULL,
-	username varchar NOT NULL,
-	email varchar NOT NULL,
-	image varchar NOT NULL DEFAULT 'https://sample.png'::character varying,
-	"password" varchar NOT NULL,
-	CONSTRAINT "PK_cace4a159ff9f2512dd42373760" PRIMARY KEY (id)
+CREATE TABLE orders
+(
+  id         int8      NOT NULL GENERATED ALWAYS AS IDENTITY,
+  user_id    int8      NOT NULL,
+  name       varchar   NOT NULL,
+  status     smallint  NOT NULL DEFAULT 0,
+  created_at timestamp DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamp DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
 );
-CREATE UNIQUE INDEX "IDX_e12875dfb3b1d92d7d7c5377e2" ON "user" USING btree (email);
+
+COMMENT ON TABLE orders IS 'orders';
+
+CREATE TABLE pays
+(
+  id         int8      NOT NULL GENERATED ALWAYS AS IDENTITY,
+  user_id    int8      NOT NULL,
+  name       varchar   NOT NULL,
+  status     smallint  NOT NULL DEFAULT 0,
+  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+);
+
+COMMENT ON TABLE pays IS 'pays';
+
+CREATE TABLE users
+(
+  id         int8      NOT NULL GENERATED ALWAYS AS IDENTITY,
+  email      varchar   NOT NULL UNIQUE,
+  password   varchar  ,
+  name       varchar  ,
+  status     smallint  NOT NULL DEFAULT 0,
+  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+);
+
+COMMENT ON TABLE users IS 'users';
+
+ALTER TABLE orders
+  ADD CONSTRAINT FK_users_TO_orders
+    FOREIGN KEY (user_id)
+    REFERENCES users (id);
+
+ALTER TABLE pays
+  ADD CONSTRAINT FK_users_TO_pays
+    FOREIGN KEY (user_id)
+    REFERENCES users (id);
+
+CREATE INDEX status
+  ON orders (status ASC);
+
+CREATE INDEX status
+  ON pays (status ASC);
+
