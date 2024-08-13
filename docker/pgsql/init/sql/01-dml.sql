@@ -1,7 +1,7 @@
 INSERT INTO users (email,"password","name",status,created_at,updated_at) VALUES
-	 ('test1@google.com',NULL,'test1',1,'2024-08-09 17:21:28.81532','2024-08-09 17:21:28.81532'),
-	 ('test2@google.com',NULL,'test2',1,'2024-08-09 17:22:22.949788','2024-08-09 17:22:22.949788'),
-	 ('test3@google.com',NULL,'test3',1,'2024-08-09 17:22:22.96018','2024-08-09 17:22:22.96018');
+	 ('test1@gmail.com','$2b$10$axe7d1exvmNfIxlR0RJOPu6cC56nhPgOALK9ToW19iexvBPlJznPe','test1',1,'2024-08-09 17:21:28.81532','2024-08-09 17:21:28.81532'),
+	 ('test2@gmail.com','$2b$10$axe7d1exvmNfIxlR0RJOPu6cC56nhPgOALK9ToW19iexvBPlJznPe','test2',1,'2024-08-09 17:22:22.949788','2024-08-09 17:22:22.949788'),
+	 ('test3@gmail.com','$2b$10$axe7d1exvmNfIxlR0RJOPu6cC56nhPgOALK9ToW19iexvBPlJznPe','test3',1,'2024-08-09 17:22:22.96018','2024-08-09 17:22:22.96018');
 
 INSERT INTO pays (user_id,"name",status,created_at,updated_at) VALUES
 	 (1,'pay1',1,'2024-08-09 17:23:18.694719','2024-08-09 17:23:18.694719'),
