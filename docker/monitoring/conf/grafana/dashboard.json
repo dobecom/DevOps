@@ -18,7 +18,6 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 1,
   "links": [],
   "panels": [
     {
@@ -550,12 +549,12 @@
             "uid": "fdsoudn7ep88wc"
           },
           "editorMode": "builder",
-          "expr": "{filename=\"/var/lib/docker/containers/5abc1baa08b8c30670790d1386fb2fc97cd540bd48569c9386cc02e73029ef10/5abc1baa08b8c30670790d1386fb2fc97cd540bd48569c9386cc02e73029ef10-json.log\"} |= ``",
+          "expr": "{filename=\"/var/lib/docker/containers/e3d4b019852969daff3db314727e377374863401e48b407ba5843bf9aecd001d/e3d4b019852969daff3db314727e377374863401e48b407ba5843bf9aecd001d-json.log\"} |= ``",
           "queryType": "range",
           "refId": "A"
         }
       ],
-      "title": "Logs - Gateway",
+      "title": "Logs - Grafana",
       "type": "logs"
     },
     {
@@ -587,12 +586,12 @@
             "uid": "fdsoudn7ep88wc"
           },
           "editorMode": "builder",
-          "expr": "{filename=\"/var/lib/docker/containers/d3ad12a3e52b170283b99099aac1d63a9c39ae4514160119094124a8e14ef8b2/d3ad12a3e52b170283b99099aac1d63a9c39ae4514160119094124a8e14ef8b2-json.log\"} |= ``",
+          "expr": "{filename=\"/var/lib/docker/containers/c815fad2371206f98cd3b419af7e28ee4457481c5634c8fac63511be2ea9f0ed/c815fad2371206f98cd3b419af7e28ee4457481c5634c8fac63511be2ea9f0ed-json.log\"} |= ``",
           "queryType": "range",
           "refId": "A"
         }
       ],
-      "title": "Logs - Auth",
+      "title": "Logs - Prometheus",
       "type": "logs"
     },
     {
@@ -684,6 +683,6 @@
   "timezone": "browser",
   "title": "Monitoring",
   "uid": "fdsougy1pagowb",
-  "version": 3,
+  "version": 5,
   "weekStart": ""
 }
